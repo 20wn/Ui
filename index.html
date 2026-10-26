@@ -587,9 +587,24 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* Bottom Keybind Prompt Box (Hidden) */
+        /* Bottom Keybind Prompt Box (Glassmorphic) */
         .keybind-box {
-            display: none !important;
+            position: fixed;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            background: var(--glass-bg);
+            border-radius: 9px;
+            border: none;
+            box-shadow: none !important;
+            backdrop-filter: blur(24px) saturate(140%);
+            -webkit-backdrop-filter: blur(24px) saturate(140%);
+            z-index: 9999;
+            overflow: hidden;
+            font-family: inherit;
+            animation: fadeInBottom 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
         }
 
         .keybind-box.hidden {
@@ -657,7 +672,7 @@
 
     <input type="file" id="bannerFileInput" accept="image/*" style="display: none;">
 
-    <div class="menu-wrapper" id="menuWrapper">
+    <div class="menu-wrapper hidden" id="menuWrapper">
         <!-- Main Container -->
         <div class="menu-container" id="menu">
             <!-- Top Banner -->
@@ -711,6 +726,17 @@
             </div>
         </div>
     </div>
+    <!-- Bottom FiveM Style Keybind Prompt Box -->
+    <div class="keybind-box" id="keybindBox">
+        <div class="keybind-header">
+            <svg viewBox="0 0 24 24"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg>
+            <span id="keybindTitle">Set Keybind: Open Menu</span>
+        </div>
+        <div class="keybind-body">
+            <span id="keybindText"><span id="typewriterText"></span><span class="typewriter-cursor">|</span></span>
+        </div>
+    </div>
+
 
 
 
@@ -736,9 +762,9 @@
         let currentView = 'main'; // 'main' or 'settings'
         let activeIndex = 0;
         let soundEnabled = true;
-        let menuToggleKey = 'f5';
-        let isWaitingForKeybind = false;
-        let isMenuOpen = true;
+        let menuToggleKey = null;
+        let isWaitingForKeybind = true;
+        let isMenuOpen = false;
 
         const i18n = {
             en: {
@@ -1236,8 +1262,13 @@
         }
 
         function showKeybindPrompt() {
-            isWaitingForKeybind = false;
-            openMenu();
+            isWaitingForKeybind = true;
+            menuWrapper.classList.add('hidden');
+            const t = i18n[currentLang];
+            keybindTitle.textContent = t.keybindTitle;
+            keybindText.innerHTML = `<span id="typewriterText"></span><span class="typewriter-cursor">|</span>`;
+            keybindBox.classList.remove('hidden');
+            startTypewriter();
         }
 
         function setMenuKeybind(keyName) {
@@ -1479,7 +1510,7 @@
 
         // Initial setup
         renderCurrentView(0);
-        openMenu();
+        showKeybindPrompt();
         if (keybindBox) {
             keybindBox.style.cursor = 'pointer';
             keybindBox.addEventListener('click', () => {

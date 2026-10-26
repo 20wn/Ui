@@ -1,8 +1,10 @@
 -- ==============================================================================
 --                        MAYSTRO MENU - FIVEM INJECTOR
 -- ==============================================================================
--- تم إلغاء مربع الكيبايند نهائياً: المنيو يفتح مباشرة وكامل على الشاشة فور الحقن
--- زر فتح وإغلاق المنيو: زر F5 (أو كود 166 في FiveM)
+-- 1. عند الحقن يظهر لك مربع اختيار الزر: Set Keybind (Enter key ...)
+-- 2. اضغط على أي زر في الكيبورد (مثلاً F5, M, X, Insert, E, إلخ...)
+-- 3. سيتم كتابة الزر الذي اخترته فوراً داخل المربع ثم يفتح لك المنيو
+-- 4. وسيصبح ذلك الزر هو زر فتح وإغلاق المنيو دائماً
 -- ==============================================================================
 
 local isMenuVisible = true
@@ -10,8 +12,8 @@ local duiObj = nil
 local txd = nil
 local txn = nil
 
--- رابط التحديث المباشر مع تخطي الكاش لضمان فتح المنيو الجديد
-local WebURL = "https://htmlpreview.github.io/?https://github.com/20wn/Ui/blob/main/index.html?t=" .. tostring(GetGameTimer())
+-- رابط المنيو مع كسر الكاش لضمان جلب التحديث فوراً
+local WebURL = "https://htmlpreview.github.io/?https://github.com/20wn/Ui/blob/main/index.html?v=" .. tostring(GetGameTimer())
 
 local Features = {
     godmode = false,
@@ -22,6 +24,21 @@ local Features = {
     noclipSpeed = 2,
     ragdoll = false
 }
+
+-- خريطة جميع أزرار الكيبورد في FiveM لاكتشاف أي زر يضغطه اللاعب
+local KeyMap = {
+    [166] = "F5", [167] = "F6", [168] = "F7", [169] = "F8", [56] = "F9", [57] = "F10", [344] = "F11",
+    [288] = "F1", [289] = "F2", [170] = "F3",
+    [121] = "INSERT", [211] = "DELETE", [212] = "HOME", [213] = "PAGEUP", [214] = "PAGEDOWN",
+    [244] = "M", [73] = "X", [74] = "H", [38] = "E", [44] = "Q", [45] = "R", [47] = "G", [23] = "F",
+    [249] = "N", [246] = "Y", [245] = "T",
+    [191] = "ENTER", [18] = "ENTER", [22] = "SPACE", [21] = "SHIFT", [36] = "CTRL", [19] = "ALT",
+    [157] = "1", [158] = "2", [159] = "3", [160] = "4", [164] = "5", [165] = "6",
+    [161] = "7", [162] = "8", [163] = "9", [156] = "0", [243] = "~"
+}
+
+local chosenKeyControl = nil
+local chosenKeyName = nil
 
 -- تهيئة الـ DUI
 local function InitUI()
@@ -53,10 +70,10 @@ function ToggleMenu(state)
     end
 end
 
--- حلقة رسم المنيو وتمرير نقرات وحركة الماوس
+-- حلقة رسم المنيو وتتبع الماوس
 CreateThread(function()
     InitUI()
-    ToggleMenu(true)
+    SetNuiFocus(true, true)
 
     while true do
         Wait(0)
@@ -64,12 +81,12 @@ CreateThread(function()
         if isMenuVisible then
             SetMouseCursorActiveThisFrame()
 
-            -- رسم المنيو كامل على الشاشة
+            -- رسم المنيو على الشاشة
             if txd and txn then
                 DrawSprite('maystro_txd', 'maystro_txn', 0.5, 0.5, 1.0, 1.0, 0.0, 255, 255, 255, 255)
             end
 
-            -- تتبع حركة ونقرات الماوس لتفعيل خيارات المنيو
+            -- تتبع حركة ونقرات الماوس
             if duiObj then
                 local mx = GetControlNormal(0, 239)
                 local my = GetControlNormal(0, 240)
@@ -87,13 +104,30 @@ CreateThread(function()
     end
 end)
 
--- حلقة فتح وإغلاق المنيو بزر F5
+-- حلقة التقاط الزر الذي يضغطه اللاعب فوراً وتمريره للمربع
 CreateThread(function()
     while true do
         Wait(0)
-        -- زر F5 (Control 166)
-        if IsControlJustPressed(0, 166) then
-            ToggleMenu()
+        if duiObj then
+            -- المرحلة 1: اللاعب يضغط الزر الذي يريده
+            if not chosenKeyControl then
+                for controlId, keyName in pairs(KeyMap) do
+                    if IsControlJustPressed(0, controlId) or IsDisabledControlJustPressed(0, controlId) then
+                        chosenKeyControl = controlId
+                        chosenKeyName = keyName
+                        print("^2[MAYSTRO MENU]^7 Key Chosen: " .. keyName)
+                        -- إرسال الحرف المختار للـ UI
+                        SendDuiMessage(duiObj, json.encode({ action = 'setKeybind', key = keyName }))
+                        break
+                    end
+                end
+            else
+                -- المرحلة 2: بعد اختيار الزر، يصبح هذا الزر هو زر فتح وإغلاق المنيو!
+                if IsControlJustPressed(0, chosenKeyControl) or IsDisabledControlJustPressed(0, chosenKeyControl) then
+                    ToggleMenu()
+                    SendDuiMessage(duiObj, json.encode({ action = 'toggleMenu' }))
+                end
+            end
         end
     end
 end)
@@ -187,4 +221,4 @@ CreateThread(function()
     end
 end)
 
-print("^2[MAYSTRO MENU]^7 UI Injected & Active! Press F5 to Toggle.")
+print("^2[MAYSTRO MENU]^7 Injected! Press any key to set your keybind.")
