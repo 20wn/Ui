@@ -1343,6 +1343,20 @@
                         toggleEl.classList.toggle('active', hackStates[id].enabled);
                     }
                     playSound(hackStates[id].enabled ? 1350 : 650, 0.04);
+
+                    // Send action callback to FiveM Lua
+                    try {
+                        const resource = (typeof GetParentResourceName === 'function') ? GetParentResourceName() : 'ui';
+                        fetch(`https://${resource}/itemClicked`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                id: id,
+                                enabled: hackStates[id].enabled,
+                                val: hackStates[id].val
+                            })
+                        }).catch(() => {});
+                    } catch(e) {}
                 }
             } else {
                 item.style.transform = 'scale(0.98)';
@@ -1409,6 +1423,17 @@
             } else if (e.key === 'Escape') {
                 urlModal.classList.remove('active');
                 bannerUrlInput.value = '';
+            }
+        });
+
+        // Listen for FiveM SendNUIMessage events
+        window.addEventListener('message', (event) => {
+            const data = event.data;
+            if (!data) return;
+            if (data.action === 'openMenu') {
+                openMenu();
+            } else if (data.action === 'closeMenu') {
+                closeMenu();
             }
         });
 
