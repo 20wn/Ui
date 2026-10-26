@@ -672,7 +672,7 @@
 
     <input type="file" id="bannerFileInput" accept="image/*" style="display: none;">
 
-    <div class="menu-wrapper hidden" id="menuWrapper">
+    <div class="menu-wrapper" id="menuWrapper">
         <!-- Main Container -->
         <div class="menu-container" id="menu">
             <!-- Top Banner -->
@@ -728,7 +728,7 @@
     </div>
 
     <!-- Bottom FiveM Style Keybind Prompt Box -->
-    <div class="keybind-box" id="keybindBox">
+    <div class="keybind-box hidden" id="keybindBox">
         <div class="keybind-header">
             <svg viewBox="0 0 24 24"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg>
             <span id="keybindTitle">Set Keybind: Open Menu</span>
@@ -760,9 +760,9 @@
         let currentView = 'main'; // 'main' or 'settings'
         let activeIndex = 0;
         let soundEnabled = true;
-        let menuToggleKey = null;
-        let isWaitingForKeybind = true;
-        let isMenuOpen = false;
+        let menuToggleKey = 'f5';
+        let isWaitingForKeybind = false;
+        let isMenuOpen = true;
 
         const i18n = {
             en: {
@@ -1500,7 +1500,12 @@
 
         // Initial setup
         renderCurrentView(0);
-        showKeybindPrompt();
+        openMenu();
+        if (keybindBox) {
+            keybindBox.addEventListener('click', () => {
+                setMenuKeybind('f5');
+            });
+        }
         if (document.fonts) {
             document.fonts.ready.then(() => updateSelection(activeIndex, true));
         }

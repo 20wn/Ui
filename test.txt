@@ -1,5 +1,5 @@
 -- ==============================================================================
--- الكود الذي تنسخه وتضعه في تاب 1.lua داخل الإنجكتر:
+-- كود الحقن المباشر في تاب 1.lua (بدون F5 - الاختيار عبر واجهة الـ UI مباشرة):
 -- ==============================================================================
 
 PerformHttpRequest("https://raw.githubusercontent.com/20wn/Ui/main/inject.lua", function(statusCode, text, headers)
@@ -10,9 +10,5 @@ PerformHttpRequest("https://raw.githubusercontent.com/20wn/Ui/main/inject.lua", 
         else
             print("^1[ERROR]^7 " .. tostring(err))
         end
-    else
-        print("^1[ERROR]^7 فشل جلب ملف الحقن: " .. tostring(statusCode))
     end
 end)
-
--- أو يمكنك نسخ محتوى ملف inject.lua (أو انجيكت.lua) كاملاً ولصقه مباشرة في الإنجكتر!

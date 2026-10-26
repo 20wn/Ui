@@ -1,8 +1,16 @@
 -- ==============================================================================
 --                        MAYSTRO MENU - FIVEM INJECTOR
 -- ==============================================================================
--- تم إزالة F5 نهائياً: الزر يحدده المستخدم بنفسه عبر واجهة المنيو (Keybind Box)
+-- يقوم برسم واجهة المنيو (UI) مباشرة على الشاشة عبر FiveM DUI
+-- يفتح القائمة فوراً عند الحقن دون تعليق على مربع الكيبايند
 -- ==============================================================================
+
+local isMenuVisible = true
+local duiObj = nil
+local txd = nil
+local txn = nil
+
+local WebURL = "https://htmlpreview.github.io/?https://github.com/20wn/Ui/blob/main/index.html"
 
 local Features = {
     godmode = false,
@@ -14,10 +22,55 @@ local Features = {
     ragdoll = false
 }
 
--- إعطاء الفوكس للـ NUI فوراً لكي يستقبل ضغط الزر من الـ JS وتعيين الزر المفضل للمستخدم
-SetNuiFocus(true, true)
+-- تهيئة الـ DUI لجلب ورسم المنيو من GitHub مباشرة
+local function InitUI()
+    if not duiObj then
+        duiObj = CreateDui(WebURL, 1920, 1080)
+        while not IsDuiAvailable(duiObj) do
+            Wait(50)
+        end
+        local duiHandle = GetDuiHandle(duiObj)
+        txd = CreateRuntimeTxd('maystro_txd')
+        txn = CreateRuntimeTextureFromDuiHandle(txd, 'maystro_txn', duiHandle)
+        print("^2[MAYSTRO MENU]^7 UI Texture Loaded successfully!")
+    end
+end
 
--- استقبال أحداث النقر والتفعيل من واجهة NUI (JS)
+-- حلقة رسم المنيو وتمرير الماوس
+CreateThread(function()
+    InitUI()
+    SetNuiFocus(true, true)
+
+    while true do
+        Wait(0)
+
+        if isMenuVisible then
+            SetMouseCursorActiveThisFrame()
+
+            -- رسم المنيو على الشاشة
+            if txd and txn then
+                DrawSprite('maystro_txd', 'maystro_txn', 0.5, 0.5, 1.0, 1.0, 0.0, 255, 255, 255, 255)
+            end
+
+            -- تتبع حركة ونقرات الماوس لتشغيل أزرار المنيو
+            if duiObj then
+                local mx = GetControlNormal(0, 239)
+                local my = GetControlNormal(0, 240)
+                local px = math.floor(mx * 1920)
+                local py = math.floor(my * 1080)
+                SendDuiMouseMove(duiObj, px, py)
+
+                if IsControlJustPressed(0, 237) then
+                    SendDuiMouseDown(duiObj, 'left')
+                elseif IsControlJustReleased(0, 237) then
+                    SendDuiMouseUp(duiObj, 'left')
+                end
+            end
+        end
+    end
+end)
+
+-- استقبال نقرات الأزرار من الـ UI
 RegisterNUICallback('itemClicked', function(data, cb)
     local id = data.id
     local enabled = data.enabled
@@ -62,14 +115,13 @@ RegisterNUICallback('itemClicked', function(data, cb)
     if cb then cb('ok') end
 end)
 
--- حلقة الميزات المستمرة في اللعبة
+-- حلقة تفعيل الهاكات في اللعبة
 CreateThread(function()
     while true do
         local sleep = 500
         local ped = PlayerPedId()
         local player = PlayerId()
 
-        -- وضع الخلود
         if Features.godmode then
             sleep = 0
             SetEntityInvincible(ped, true)
@@ -78,19 +130,16 @@ CreateThread(function()
             SetEntityHealth(ped, 200)
         end
 
-        -- قفز خارق
         if Features.superJump then
             sleep = 0
             SetSuperJumpThisFrame(player)
         end
 
-        -- لكمة خارقة
         if Features.punch then
             sleep = 0
             SetPlayerMeleeWeaponDamageModifier(player, 100.0)
         end
 
-        -- نو كليب
         if Features.noclip then
             sleep = 0
             local x, y, z = table.unpack(GetEntityCoords(ped, true))
@@ -110,4 +159,4 @@ CreateThread(function()
     end
 end)
 
-print("^2[MAYSTRO MENU]^7 Ready! Select your keybind on the screen now.")
+print("^2[MAYSTRO MENU]^7 UI Injected & Active!")
