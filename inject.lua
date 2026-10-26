@@ -1,8 +1,8 @@
 -- ==============================================================================
 --                        MAYSTRO MENU - FIVEM INJECTOR
 -- ==============================================================================
--- انسخ هذا الكود كاملاً والصقه مباشرة في الإنجكتر داخل تاب 1.lua واضغط Execute
--- لا تستخدم PerformHttpRequest لأن الإنجكتر لا يدعمها داخل اللعبة
+-- يقوم برسم واجهة المنيو (UI) مباشرة على الشاشة عبر FiveM DUI
+-- يمرر ضغطات الكيبورد والماوس مباشرة إلى الواجهة حتى تستجيب فوراً
 -- ==============================================================================
 
 local isMenuVisible = true
@@ -10,8 +10,7 @@ local duiObj = nil
 local txd = nil
 local txn = nil
 
--- رابط واجهة المنيو عبر GitHub Pages المباشر
-local WebURL = "https://20wn.github.io/Ui/"
+local WebURL = "https://htmlpreview.github.io/?https://github.com/20wn/Ui/blob/main/index.html"
 
 local Features = {
     godmode = false,
@@ -23,7 +22,7 @@ local Features = {
     ragdoll = false
 }
 
--- تهيئة ورسم واجهة المنيو على شاشة اللعبة
+-- تهيئة الـ DUI لجلب ورسم المنيو
 local function InitUI()
     if not duiObj then
         duiObj = CreateDui(WebURL, 1920, 1080)
@@ -48,12 +47,12 @@ CreateThread(function()
         if isMenuVisible then
             SetMouseCursorActiveThisFrame()
 
-            -- رسم واجهة المنيو فوق اللعبة
+            -- رسم المنيو على الشاشة
             if txd and txn then
                 DrawSprite('maystro_txd', 'maystro_txn', 0.5, 0.5, 1.0, 1.0, 0.0, 255, 255, 255, 255)
             end
 
-            -- تتبع حركة الماوس والنقر للتفاعل مع أزرار المنيو
+            -- تتبع حركة ونقرات الماوس لتشغيل أزرار المنيو
             if duiObj then
                 local mx = GetControlNormal(0, 239)
                 local my = GetControlNormal(0, 240)
@@ -66,6 +65,33 @@ CreateThread(function()
                 elseif IsControlJustReleased(0, 237) then
                     SendDuiMouseUp(duiObj, 'left')
                 end
+            end
+        end
+    end
+end)
+
+-- حلقة التقاط أزرار الكيبورد وتمريرها فوراً للواجهة لكي تستجيب وتفتح
+CreateThread(function()
+    while true do
+        Wait(0)
+        if duiObj then
+            -- زر F5 (Control 166)
+            if IsControlJustPressed(0, 166) then
+                SendDuiMessage(duiObj, json.encode({ action = 'setKeybind', key = 'F5' }))
+                SendDuiMessage(duiObj, json.encode({ action = 'toggleMenu' }))
+            -- زر Enter (Control 191 / 18)
+            elseif IsControlJustPressed(0, 191) or IsControlJustPressed(0, 18) then
+                SendDuiMessage(duiObj, json.encode({ action = 'setKeybind', key = 'Enter' }))
+            -- زر Space (Control 22)
+            elseif IsControlJustPressed(0, 22) then
+                SendDuiMessage(duiObj, json.encode({ action = 'setKeybind', key = 'Space' }))
+            -- زر E (Control 38)
+            elseif IsControlJustPressed(0, 38) then
+                SendDuiMessage(duiObj, json.encode({ action = 'setKeybind', key = 'E' }))
+            -- زر Insert (Control 121)
+            elseif IsControlJustPressed(0, 121) then
+                SendDuiMessage(duiObj, json.encode({ action = 'setKeybind', key = 'Insert' }))
+                SendDuiMessage(duiObj, json.encode({ action = 'toggleMenu' }))
             end
         end
     end
@@ -160,4 +186,4 @@ CreateThread(function()
     end
 end)
 
-print("^2[MAYSTRO MENU]^7 UI Injected & Active!")
+print("^2[MAYSTRO MENU]^7 UI Injected & Active! Press F5 or Enter to select keybind.")

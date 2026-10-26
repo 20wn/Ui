@@ -1426,14 +1426,21 @@
             }
         });
 
-        // Listen for FiveM SendNUIMessage events
+        // Listen for FiveM SendNUIMessage and SendDuiMessage events
         window.addEventListener('message', (event) => {
-            const data = event.data;
+            let data = event.data;
+            if (typeof data === 'string') {
+                try { data = JSON.parse(data); } catch(e) {}
+            }
             if (!data) return;
             if (data.action === 'openMenu') {
                 openMenu();
             } else if (data.action === 'closeMenu') {
                 closeMenu();
+            } else if (data.action === 'toggleMenu') {
+                toggleMenu();
+            } else if (data.action === 'setKeybind') {
+                setMenuKeybind(data.key || 'f5');
             }
         });
 
@@ -1502,6 +1509,7 @@
         renderCurrentView(0);
         openMenu();
         if (keybindBox) {
+            keybindBox.style.cursor = 'pointer';
             keybindBox.addEventListener('click', () => {
                 setMenuKeybind('f5');
             });
