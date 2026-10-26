@@ -1,8 +1,8 @@
 -- ==============================================================================
 --                        MAYSTRO MENU - FIVEM INJECTOR
 -- ==============================================================================
--- يقوم برسم واجهة المنيو (UI) مباشرة على الشاشة عبر FiveM DUI
--- يفتح القائمة فوراً عند الحقن دون تعليق على مربع الكيبايند
+-- انسخ هذا الكود كاملاً والصقه مباشرة في الإنجكتر داخل تاب 1.lua واضغط Execute
+-- لا تستخدم PerformHttpRequest لأن الإنجكتر لا يدعمها داخل اللعبة
 -- ==============================================================================
 
 local isMenuVisible = true
@@ -10,7 +10,8 @@ local duiObj = nil
 local txd = nil
 local txn = nil
 
-local WebURL = "https://htmlpreview.github.io/?https://github.com/20wn/Ui/blob/main/index.html"
+-- رابط واجهة المنيو عبر GitHub Pages المباشر
+local WebURL = "https://20wn.github.io/Ui/"
 
 local Features = {
     godmode = false,
@@ -22,7 +23,7 @@ local Features = {
     ragdoll = false
 }
 
--- تهيئة الـ DUI لجلب ورسم المنيو من GitHub مباشرة
+-- تهيئة ورسم واجهة المنيو على شاشة اللعبة
 local function InitUI()
     if not duiObj then
         duiObj = CreateDui(WebURL, 1920, 1080)
@@ -47,12 +48,12 @@ CreateThread(function()
         if isMenuVisible then
             SetMouseCursorActiveThisFrame()
 
-            -- رسم المنيو على الشاشة
+            -- رسم واجهة المنيو فوق اللعبة
             if txd and txn then
                 DrawSprite('maystro_txd', 'maystro_txn', 0.5, 0.5, 1.0, 1.0, 0.0, 255, 255, 255, 255)
             end
 
-            -- تتبع حركة ونقرات الماوس لتشغيل أزرار المنيو
+            -- تتبع حركة الماوس والنقر للتفاعل مع أزرار المنيو
             if duiObj then
                 local mx = GetControlNormal(0, 239)
                 local my = GetControlNormal(0, 240)

@@ -1,14 +1,8 @@
 -- ==============================================================================
--- كود الحقن المباشر في تاب 1.lua (بدون F5 - الاختيار عبر واجهة الـ UI مباشرة):
+-- الكود الجاهز للنسخ المباشر في تاب 1.lua (لا تستخدم PerformHttpRequest):
 -- ==============================================================================
 
-PerformHttpRequest("https://raw.githubusercontent.com/20wn/Ui/main/inject.lua", function(statusCode, text, headers)
-    if statusCode == 200 and text then
-        local run, err = load(text)
-        if run then
-            run()
-        else
-            print("^1[ERROR]^7 " .. tostring(err))
-        end
-    end
-end)
+-- تفعيل GitHub Pages أولاً من الرابط:
+-- https://github.com/20wn/Ui/settings/pages
+-- اختر: main واضغط Save
+-- ثم انسخ محتوى inject.lua كاملاً وضعه في الإنجكتر.
