@@ -1,8 +1,8 @@
 -- ==============================================================================
 --                        MAYSTRO MENU - FIVEM INJECTOR
 -- ==============================================================================
--- يقوم برسم واجهة المنيو (UI) مباشرة على الشاشة عبر FiveM DUI
--- يمرر ضغطات الكيبورد والماوس مباشرة إلى الواجهة حتى تستجيب فوراً
+-- تم إلغاء مربع الكيبايند نهائياً: المنيو يفتح مباشرة وكامل على الشاشة فور الحقن
+-- زر فتح وإغلاق المنيو: زر F5 (أو كود 166 في FiveM)
 -- ==============================================================================
 
 local isMenuVisible = true
@@ -10,7 +10,8 @@ local duiObj = nil
 local txd = nil
 local txn = nil
 
-local WebURL = "https://htmlpreview.github.io/?https://github.com/20wn/Ui/blob/main/index.html"
+-- رابط التحديث المباشر مع تخطي الكاش لضمان فتح المنيو الجديد
+local WebURL = "https://htmlpreview.github.io/?https://github.com/20wn/Ui/blob/main/index.html?t=" .. tostring(GetGameTimer())
 
 local Features = {
     godmode = false,
@@ -22,7 +23,7 @@ local Features = {
     ragdoll = false
 }
 
--- تهيئة الـ DUI لجلب ورسم المنيو
+-- تهيئة الـ DUI
 local function InitUI()
     if not duiObj then
         duiObj = CreateDui(WebURL, 1920, 1080)
@@ -36,10 +37,26 @@ local function InitUI()
     end
 end
 
--- حلقة رسم المنيو وتمرير الماوس
+-- دالة فتح وإغلاق المنيو
+function ToggleMenu(state)
+    if state == nil then
+        isMenuVisible = not isMenuVisible
+    else
+        isMenuVisible = state
+    end
+
+    SetNuiFocus(isMenuVisible, isMenuVisible)
+    if isMenuVisible then
+        print("^2[MAYSTRO MENU]^7 Menu Opened")
+    else
+        print("^3[MAYSTRO MENU]^7 Menu Closed")
+    end
+end
+
+-- حلقة رسم المنيو وتمرير نقرات وحركة الماوس
 CreateThread(function()
     InitUI()
-    SetNuiFocus(true, true)
+    ToggleMenu(true)
 
     while true do
         Wait(0)
@@ -47,12 +64,12 @@ CreateThread(function()
         if isMenuVisible then
             SetMouseCursorActiveThisFrame()
 
-            -- رسم المنيو على الشاشة
+            -- رسم المنيو كامل على الشاشة
             if txd and txn then
                 DrawSprite('maystro_txd', 'maystro_txn', 0.5, 0.5, 1.0, 1.0, 0.0, 255, 255, 255, 255)
             end
 
-            -- تتبع حركة ونقرات الماوس لتشغيل أزرار المنيو
+            -- تتبع حركة ونقرات الماوس لتفعيل خيارات المنيو
             if duiObj then
                 local mx = GetControlNormal(0, 239)
                 local my = GetControlNormal(0, 240)
@@ -70,29 +87,13 @@ CreateThread(function()
     end
 end)
 
--- حلقة التقاط أزرار الكيبورد وتمريرها فوراً للواجهة لكي تستجيب وتفتح
+-- حلقة فتح وإغلاق المنيو بزر F5
 CreateThread(function()
     while true do
         Wait(0)
-        if duiObj then
-            -- زر F5 (Control 166)
-            if IsControlJustPressed(0, 166) then
-                SendDuiMessage(duiObj, json.encode({ action = 'setKeybind', key = 'F5' }))
-                SendDuiMessage(duiObj, json.encode({ action = 'toggleMenu' }))
-            -- زر Enter (Control 191 / 18)
-            elseif IsControlJustPressed(0, 191) or IsControlJustPressed(0, 18) then
-                SendDuiMessage(duiObj, json.encode({ action = 'setKeybind', key = 'Enter' }))
-            -- زر Space (Control 22)
-            elseif IsControlJustPressed(0, 22) then
-                SendDuiMessage(duiObj, json.encode({ action = 'setKeybind', key = 'Space' }))
-            -- زر E (Control 38)
-            elseif IsControlJustPressed(0, 38) then
-                SendDuiMessage(duiObj, json.encode({ action = 'setKeybind', key = 'E' }))
-            -- زر Insert (Control 121)
-            elseif IsControlJustPressed(0, 121) then
-                SendDuiMessage(duiObj, json.encode({ action = 'setKeybind', key = 'Insert' }))
-                SendDuiMessage(duiObj, json.encode({ action = 'toggleMenu' }))
-            end
+        -- زر F5 (Control 166)
+        if IsControlJustPressed(0, 166) then
+            ToggleMenu()
         end
     end
 end)
@@ -186,4 +187,4 @@ CreateThread(function()
     end
 end)
 
-print("^2[MAYSTRO MENU]^7 UI Injected & Active! Press F5 or Enter to select keybind.")
+print("^2[MAYSTRO MENU]^7 UI Injected & Active! Press F5 to Toggle.")
