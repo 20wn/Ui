@@ -1,14 +1,9 @@
 -- ==============================================================================
---                        MAYSTRO MENU - FIVEM EXECUTOR LOADER
+--                        MAYSTRO MENU - FIVEM EXECUTOR
 -- ==============================================================================
--- هذا الملف مخصص للحقن المباشر عبر الإنجكتر (Injector / Lua Executor)
--- يقوم بإنشاء أو تفعيل الـ NUI وعرض القائمة مباشرة مع تفعيل الأزرار والوظائف
+-- تم إزالة F5: التحكم بالكامل والزر يحدده المستخدم عبر واجهة الـ JS (Keybind Box)
 -- ==============================================================================
 
-local ResourceName = GetCurrentResourceName() or "ui"
-local isMenuVisible = false
-
--- 1. تعريف وظائف المنيو (Godmode, SuperJump, etc.)
 local Features = {
     godmode = false,
     superJump = false,
@@ -16,16 +11,10 @@ local Features = {
     punch = false
 }
 
--- 2. إرسال أمر فتح / إغلاق القائمة إلى الـ NUI
-local function ToggleMenu(state)
-    isMenuVisible = state
-    SetNuiFocus(state, state)
-    SendNUIMessage({
-        action = state and "openMenu" or "closeMenu"
-    })
-end
+-- إعطاء الفوكس للـ NUI فوراً لكي يستقبل ضغط الزر من الـ JS
+SetNuiFocus(true, true)
 
--- 3. استقبال النقرات من الـ NUI وتنفيذ الميزات
+-- استقبال النقرات من الـ NUI وتنفيذ ميزات الهاك
 RegisterNUICallback('itemClicked', function(data, cb)
     local id = data.id
     local enabled = data.enabled
@@ -33,32 +22,26 @@ RegisterNUICallback('itemClicked', function(data, cb)
     if id == 'godmode' then
         Features.godmode = enabled
         SetEntityInvincible(PlayerPedId(), enabled)
-        print("[MAYSTRO] Godmode set to: " .. tostring(enabled))
+        print("[MAYSTRO] Godmode: " .. tostring(enabled))
 
     elseif id == 'superJump' then
         Features.superJump = enabled
-        print("[MAYSTRO] Super Jump set to: " .. tostring(enabled))
+        print("[MAYSTRO] Super Jump: " .. tostring(enabled))
 
     elseif id == 'invisible' then
         Features.invisible = enabled
         SetEntityVisible(PlayerPedId(), not enabled, 0)
-        print("[MAYSTRO] Invisibility set to: " .. tostring(enabled))
+        print("[MAYSTRO] Invisible: " .. tostring(enabled))
 
     elseif id == 'punch' then
         Features.punch = enabled
-        print("[MAYSTRO] Super Punch set to: " .. tostring(enabled))
+        print("[MAYSTRO] Punch: " .. tostring(enabled))
     end
 
     if cb then cb('ok') end
 end)
 
--- استقبال حدث إغلاق القائمة
-RegisterNUICallback('closeMenu', function(data, cb)
-    ToggleMenu(false)
-    if cb then cb('ok') end
-end)
-
--- 4. حلقة لتنفيذ ميزات الهاك التي تحتاج تحديث مستمر (Tick Loop)
+-- حلقة الميزات المستمرة
 CreateThread(function()
     while true do
         local sleep = 500
@@ -84,19 +67,4 @@ CreateThread(function()
     end
 end)
 
--- 5. فتح وإغلاق القائمة بضغط زر (F5 افتراضياً، كود الزر: 166)
-CreateThread(function()
-    while true do
-        Wait(0)
-        if IsControlJustPressed(0, 166) then -- F5
-            ToggleMenu(not isMenuVisible)
-        end
-    end
-end)
-
--- 6. فتح القائمة تلقائياً فور الحقن
-CreateThread(function()
-    Wait(200)
-    ToggleMenu(true)
-    print("^2[MAYSTRO MENU]^7 Injected & Loaded successfully! Press F5 to toggle.")
-end)
+print("^2[MAYSTRO MENU]^7 Ready - select your keybind in UI!")
