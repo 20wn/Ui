@@ -1,0 +1,25 @@
+^1SCRIPT ERROR: @default/lmbGiEO3.lua:1: attempt to index a nil value (global 'game')^7
+^3> ?^7 (^5@default/lmbGiEO3.lua^7:1)
+
+-- ==============================================================================
+-- المشكلة والحل:
+-- ==============================================================================
+-- 1. سبب الخطأ السابق:
+-- كنت تستخدم كود خاص بـ Roblox:
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/20wn/Ui/main/injector.lua"))()
+-- في FiveM لا يوجد كائن اسمه 'game'.
+
+-- 2. الطريقة الأولى: وضع كود التحميل السريع في تاب 1.lua داخل الإنجكتر:
+PerformHttpRequest("https://raw.githubusercontent.com/20wn/Ui/main/injector.lua", function(statusCode, text, headers)
+    if statusCode == 200 and text then
+        local run, err = load(text)
+        if run then
+            run()
+        else
+            print("^1[ERROR]^7 " .. tostring(err))
+        end
+    end
+end)
+
+-- 3. الطريقة الثانية: نسخ محتوى ملف injector.lua كاملاً ولصقه مباشرة في تاب 1.lua
+-- الضغط على زر Execute وسيفتح المنيو، وتستطيع فتحه وإغلاقه بزر F5.
