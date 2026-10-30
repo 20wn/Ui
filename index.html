@@ -498,9 +498,9 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1328,6 +1328,7 @@
                 urlModal.classList.add('active');
                 bannerUrlInput.focus();
                 bannerUrlInput.value = '';
+                try { fetch('https://' + GetParentResourceName() + '/setModalFocus', { method: 'POST', body: JSON.stringify({ focus: true }) }); } catch(e){}
             } else if (action === 'delete-image') {
                 bannerImg.src = '';
                 bannerImg.style.display = 'none';
@@ -1413,6 +1414,7 @@
         urlModal.addEventListener('click', (e) => {
             if (e.target === urlModal) {
                 urlModal.classList.remove('active');
+                try { fetch('https://' + GetParentResourceName() + '/setModalFocus', { method: 'POST', body: JSON.stringify({ focus: false }) }); } catch(e){}
             }
         });
 
@@ -1423,9 +1425,11 @@
                 urlModal.classList.remove('active');
                 bannerUrlInput.value = '';
                 if (url) updateBanner(url);
+                try { fetch('https://' + GetParentResourceName() + '/setModalFocus', { method: 'POST', body: JSON.stringify({ focus: false }) }); } catch(e){}
             } else if (e.key === 'Escape') {
                 urlModal.classList.remove('active');
                 bannerUrlInput.value = '';
+                try { fetch('https://' + GetParentResourceName() + '/setModalFocus', { method: 'POST', body: JSON.stringify({ focus: false }) }); } catch(e){}
             }
         });
 
