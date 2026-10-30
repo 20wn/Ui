@@ -1447,6 +1447,8 @@
             } else if (data.action === 'keydown') {
                 // simulate keyboard nav sent from Lua
                 window.dispatchEvent(new KeyboardEvent('keydown', { key: data.key, bubbles: true }));
+            } else if (data.action === 'showKeybind') {
+                showKeybindPrompt();
             }
         });
 
